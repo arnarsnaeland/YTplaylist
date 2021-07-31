@@ -3,9 +3,7 @@ import math
 import re
 import sys
 
-API_KEY = 'AIzaSyAnd5q_9jt9mmYGl2dJx2deTOwXXm3ZXNw'     #TODO: Færa í annan file
-CLIENT_ID = '956cf02a80964b929a8f6ad2bfe9eab2'
-CLIENT_SECRET = '35dcb781fc04447ea3e796a9dc0b2840'
+
 AUTH_URL = 'https://accounts.spotify.com/api/token'
 
 playlist = []
