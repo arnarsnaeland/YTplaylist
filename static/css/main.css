@@ -1,0 +1,12 @@
+body {
+    margin : 0;
+    font-family: sans-serif;
+}
+
+.playlist {
+    width: 100%;
+    border: 1px solid black;
+  }
+tr {
+    height:"10px";
+}

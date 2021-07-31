@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Youtube to Spotify</title>
+{% endblock %}
+
+{% block body %}
+<div>
+    <h1>Youtube to Spotify</h1>
+
+    <form action="/" method="POST">
+        <input type="text" name="content" id="content">
+        <input type="submit" value="Get playlist">
+    </form>
+    <table class="playlist">
+        <tr>
+            <th>Song name</th>
+        </tr>
+        {% for song in playlist %}
+            <tr>
+                <td>{{song.title}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}
