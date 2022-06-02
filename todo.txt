@@ -1,0 +1,3 @@
+Tengja við spotify
+Algorithm til að finna besta match, ef undir ehv mörkum gefa option á tveim líklegustu eða að nota dl feature
+Downloada lögum og setja í spotify playlist (Næs fyrir obscure tónlist sem er ekki á Spotify, þarf premium til að gera?)

@@ -2,11 +2,22 @@ import requests
 import math
 import re
 import sys
+import os
+from dotenv import load_dotenv
+import re
+import json
 
+load_dotenv()
+AUTH_URL = 'https://accounts.spotify.com/authorize'
+TOKEN_URL = 'https://accounts.spotify.com/api/token'
+ME_URL = 'https://api.spotify.com/v1/me'
+API_KEY = os.getenv("YT_KEY")
+SPOTIFY_ID = os.getenv("SPOTIFY_ID")
+SPOTIFY_KEY = os.getenv("SPOTIFY_KEY")
+REDIRECT_URI = os.getenv("REDIRECT_URI")
 
-AUTH_URL = 'https://accounts.spotify.com/api/token'
+spotify_token = ''
 
-playlist = []
 
 #Sér um að gera http requestið, token er fyrir næsta page ef needed    
 def makeRequest(playlistId, token = ''):
@@ -18,30 +29,54 @@ def makeRequest(playlistId, token = ''):
                'maxResults' : 200, 
                'key' : API_KEY} 
     return requests.get(url, params = payload, headers = headers)
+
+
+'''def getTitleAndArtist(youtube_url):
+    song_name = None
+    artist_name = None
+ 
+    r = requests.get(youtube_url)
+ 
+    raw_matches = re.findall('(\{"metadataRowRenderer":.*?\})(?=,{"metadataRowRenderer")', r.text)
+    json_objects = [json.loads(m) for m in raw_matches if '{"simpleText":"Song"}' in m or '{"simpleText":"Artist"}' in m] # [Song Data, Artist Data]
+ 
+    if len(json_objects) == 2:
+        song_contents = json_objects[0]["metadataRowRenderer"]["contents"][0]
+        artist_contents = json_objects[1]["metadataRowRenderer"]["contents"][0]
+ 
+        if "runs" in song_contents:
+            song_name = song_contents["runs"][0]["text"]
+        else:
+            song_name = song_contents["simpleText"]
+           
+        if "runs" in artist_contents:
+            artist_name = artist_contents["runs"][0]["text"]
+        else:
+            artist_name = artist_contents["simpleText"]
+ 
+    return song_name, artist_name
+ '''
+
+     
 #Bætir titlum í playlist
 def addToPlaylist(playlist, jsonMess):
     for item in jsonMess['items']:
-        playlist.append(item['snippet']['title'])
-        
-def getSpotifyAuth():
-    auth_response = requests.post(AUTH_URL, {
-    'grant_type': 'client_credentials',
-    'client_id': CLIENT_ID,
-    'client_secret': CLIENT_SECRET})
-    auth_response_data = auth_response.json()
-    return auth_response_data['access_token']
-
-def spotifyRequest(accessToken):
-    url = 'https://api.spotify.com/v1/'
-    headers = { 'Authorization': 'Bearer {token}'.format(token=accessToken)}
+        #song, artist = getTitleAndArtist(f"https://www.youtube.com/watch?v={item['snippet']['resourceId']['videoId']}")
+        #Check if this works, if not use video title
+        #if song is not None and artist is not None:
+        #    playlist.append(artist + " - " + song)
+        #else:
+        track = re.sub("[\(\[].*?[\)\]]", "", item['snippet']['title']) #Remove parentheses and brackets (including what is inside them)
+        track = track.rstrip() #Remove trailing white spaces
+        playlist.append(track)
     
 #Tekur inn url og skilar bara playlistId
 def getPlaylistId(url):
-    print(url)
     match = re.search("[&?]list=([^&]+)", url)       #Copy paste it works :)
     return (match.group()[6::])       #Mix til að ná ?list= af matchinu 
 
 def main(url):
+    playlist = []
     playlistId = getPlaylistId(url)
     res = makeRequest(playlistId)                 #Byrja að keyra fyrsta request
     print(res)
@@ -55,7 +90,6 @@ def main(url):
         nextPageToken = jsonMess['nextPageToken']
         numRequests = math.ceil(totalResults/resultsPerPage)
         for x in range(numRequests):                                                #TODO: Færa allt úr main í föll
-            print(nextPageToken)
             res = makeRequest(playlistId, nextPageToken)
             jsonMess = res.json()
             addToPlaylist(playlist, jsonMess)
@@ -63,8 +97,6 @@ def main(url):
                 nextPageToken = jsonMess['nextPageToken']
             else:
                 nextPageToken = ''
-
-    print(playlist)
     return playlist
     
     #TODO: Tengja við spotify
@@ -72,8 +104,5 @@ def main(url):
     
     
     #TODO: Downloada lögum og setja í spotify playlist (Næs fyrir obscure tónlist sem er ekki á Spotify, þarf premium til að gera?)
-
-if __name__ == "__main__":
-    main(sys.argv[1])
 
 
